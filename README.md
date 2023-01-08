@@ -7,3 +7,4 @@
 
 - Add routing
 - Implement TypeScript
+- Add Tailwind.css / CSS-in-JS
