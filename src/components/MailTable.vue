@@ -53,9 +53,11 @@
   import BulkActionBar from '@/components/BulkActionBar.vue';
   import { reactive, ref } from 'vue';
   import useEmailSelection from '@/composables/use-email-selection'
+  import database from '@/db.json'
   export default {
-    async setup(){
-      let {data: emails} = await axios.get('http://localhost:3000/emails')
+    setup(){
+      // let {data: emails} = await axios.get('http://localhost:3000/emails')
+      let emails = database.emails
       return {
         emailSelection: useEmailSelection(),
         format,

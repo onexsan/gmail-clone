@@ -5,14 +5,7 @@ import MailTable from './components/MailTable.vue'
 <template>
   <div>
     <h1>Gmailius</h1>
-    <Suspense>
-      <div>
-        <MailTable />
-      </div>
-      <template #fallback>
-        Loading...
-      </template>
-    </Suspense>
+    <MailTable />
   </div>
 </template>
 
