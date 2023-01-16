@@ -45,25 +45,30 @@
   </ModalView>
 </template>
 
-<script>
+<script lang="ts">
   import { format } from 'date-fns';
-  import axios from 'axios';
   import MailView from '@/components/MailView.vue';
   import ModalView from '@/components/ModalView.vue';
   import BulkActionBar from '@/components/BulkActionBar.vue';
-  import { reactive, ref } from 'vue';
+  import { defineComponent, reactive, ref } from 'vue';
   import useEmailSelection from '@/composables/use-email-selection'
-  import database from '@/db.json'
-  export default {
+  import { useEmailStore } from '@/stores/EmailStore'
+  import type { EmailList, Email } from '../types';
+
+  type SelectedScreen = 'inbox' | 'archive'
+
+  export default defineComponent({
     setup(){
       // let {data: emails} = await axios.get('http://localhost:3000/emails')
-      let emails = database.emails
+      let emailStore = useEmailStore()
+      let emails = emailStore.emails
       return {
         emailSelection: useEmailSelection(),
         format,
-        emails: ref(emails),
-        openedEmail: ref(null),
-        selectedScreen: ref('inbox')
+        emails: ref<EmailList>(emails),
+        openedEmail: ref<Email | null>(null),
+        selectedScreen: ref<SelectedScreen>('inbox'),
+        emailStore
       }
     },
     components: {
@@ -72,12 +77,12 @@
       BulkActionBar,
     },
     computed: {
-      sortedEmails() {
+      sortedEmails(): EmailList {
         return this.emails.sort((e1, e2) => {
           return e1.sentAt < e2.sentAt ? 1 : -1
         })
       },
-      filteredEmails() {
+      filteredEmails(): EmailList {
         if(this.selectedScreen == 'inbox') {
           return this.sortedEmails.filter(e => !e.archived)
         } else {
@@ -86,37 +91,38 @@
       }
     },
     methods: {
-      selectScreen(newScreen) {
+      selectScreen(newScreen: SelectedScreen) {
         this.selectedScreen = newScreen
         this.emailSelection.clear()
       },
-      openEmail(email) {
+      openEmail(email: Email) {
         this.openedEmail = email
         if(email) {
           email.read = true
           this.updateEmail(email)
         }
       },
-      handleArchive(email, value) {
+      handleArchive(email: Email, value: boolean) {
         email.archived = value
         this.updateEmail(email)
       },
-      changeEmail({toggleRead, toggleArchive, save, closeModal, changeIndex}) {
+      changeEmail({toggleRead, toggleArchive, save, closeModal, changeIndex}: {toggleRead: boolean, toggleArchive: boolean, save: boolean, closeModal: boolean, changeIndex: number}) {
         let email = this.openedEmail
-        if(toggleRead) { email.read = !email.read }
-        if(toggleArchive) { email.archived = !email.archived }
-        if(save) { this.updateEmail(email) }
+        if(toggleRead) { if (email) email.read = !email.read }
+        if(toggleArchive) { if (email) email.archived = !email.archived }
+        if(save) { email && this.updateEmail(email) }
         if(closeModal) { this.openedEmail = null }
         if(changeIndex) {
           let emails = this.filteredEmails
-          let currentIndex = emails.indexOf(this.openedEmail)
-          let newEmail = emails[currentIndex + changeIndex]
-          this.openEmail(newEmail)
+          let currentIndex = this.openedEmail && emails.indexOf(this.openedEmail)
+          let newEmail = currentIndex && emails[currentIndex + changeIndex]
+          newEmail && this.openEmail(newEmail)
         }
       },
-      updateEmail(email) {
-        axios.put(`http://localhost:3000/emails/${email.id}`, email)
+      updateEmail(email: Email) {
+        this.emailStore.updateEmail(email)
+        // axios.put(`http://localhost:3000/emails/${email.id}`, email)
       }
     }
-  }
+  })
 </script>

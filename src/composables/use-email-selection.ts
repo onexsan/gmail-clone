@@ -1,10 +1,11 @@
 import { reactive } from 'vue';
-import axios from 'axios';
+import { useEmailStore } from '@/stores/EmailStore'
+import type {EmailList, Email} from '@/types'
 
-let emails = reactive(new Set())
+let emails = reactive(new Set<Email>())
 
 export const useEmailSelection = function(){
-  let toggle = function(email) {
+  let toggle = function(email: Email) {
     if(emails.has(email)) {
       emails.delete(email)
     } else {
@@ -14,21 +15,24 @@ export const useEmailSelection = function(){
   let clear = () => {
     emails.clear()
   }
-  let addMultiple = (newEmails) => {
-    newEmails.forEach((email) => {
+  
+  let store = useEmailStore()
+  let addMultiple = (newEmails: EmailList) => {
+    newEmails.forEach((email: Email) => {
       emails.add(email)
     })
   }
-  let forSelected = (fn) => {
-    emails.forEach((email) => {
+  let forSelected = (fn: any) => {
+    emails.forEach((email: Email) => {
       fn(email);
-      axios.put(`http://localhost:3000/emails/${email.id}`, email)
+      store.updateEmail(email)
+      // axios.put(`http://localhost:3000/emails/${email.id}`, email)
     })
   }
-  let markRead = () => forSelected(e => e.read = true)
-  let markUnread = () => forSelected(e => e.read = false)
-  let archive = () => { forSelected(e => e.archived = true); clear() }
-  let unarchive = () => { forSelected(e => e.archived = false); clear() }
+  let markRead = () => forSelected((e: any) => e.read = true)
+  let markUnread = () => forSelected((e: any) => e.read = false)
+  let archive = () => { forSelected((e: any) => e.archived = true); clear() }
+  let unarchive = () => { forSelected((e: any) => e.archived = false); clear() }
 
   return {
     emails,

@@ -12,13 +12,15 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import  { format } from 'date-fns'
   import {marked} from 'marked'
-  import axios from 'axios'
   import useKeydown from '../composables/use-keydown'
+  import { defineComponent } from 'vue'
+  import type { PropType } from 'vue'
+  import type {Email} from '@/types'
 
-  export default {
+  export default defineComponent({
     setup(props, {emit}){
       let email = props.email;
 
@@ -45,9 +47,9 @@
     },
     props: {
       email: {
-        type: Object,
+        type: Object as PropType<Email>,
         required: true
       }
     }
-  }
+  })
 </script>

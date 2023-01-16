@@ -28,19 +28,22 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import useEmailSelection from '@/composables/use-email-selection';
-  import { computed } from 'vue'
-  export default {
+  import { computed, defineComponent } from 'vue'
+  import type { PropType } from 'vue';
+  import type {EmailList} from '@/types'
+
+  export default defineComponent({
     setup(props){
       let emailSelection = useEmailSelection();
-      let numberSelected = computed(() => emailSelection.emails.size)
-      let numberEmails = computed(() => props.emails.length)
-      let allEmailsSelected = computed(() => numberSelected.value === numberEmails.value)
-      let someEmailsSelected = computed(() => {
+      let numberSelected = computed((): number => emailSelection.emails.size)
+      let numberEmails = computed((): number => props.emails.length)
+      let allEmailsSelected = computed((): boolean => numberSelected.value === numberEmails.value)
+      let someEmailsSelected = computed((): boolean => {
         return numberSelected.value > 0 && numberSelected.value < numberEmails.value
       })
-      let bulkSelect = function(){
+      let bulkSelect = function(): void {
         if(allEmailsSelected.value) {
           emailSelection.clear()
         } else {
@@ -57,7 +60,7 @@
     },
     props: {
       emails: {
-        type: Array,
+        type: Array as PropType<EmailList>,
         required: true
       },
       selectedScreen: {
@@ -65,5 +68,5 @@
         default: 'inbox'
       }
     }
-  }
+  })
 </script>

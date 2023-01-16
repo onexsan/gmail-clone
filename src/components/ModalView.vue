@@ -7,7 +7,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
   import useKeydown from '../composables/use-keydown';
   export default {
     setup(props, {emit}) {
